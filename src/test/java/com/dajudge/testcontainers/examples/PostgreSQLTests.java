@@ -17,7 +17,7 @@ public class PostgreSQLTests {
 
     @ClassRule
     public static final PostgreSQLContainer<?> PSQL = new PostgreSQLContainer<>("postgres:9.6.12")
-            .withDatabaseName(DATABASE_NAME);
+            .withDatabaseName(DATABASE_NAME);   // this sets the database name to be used
 
     @Test
     public void check_database_name() throws SQLException {
@@ -37,12 +37,15 @@ public class PostgreSQLTests {
             try (final PreparedStatement statement = conn.prepareStatement(format("CREATE SCHEMA %s", SCHEMA_NAME))) {
                 statement.execute();
             }
+            // Create a table without specifying the shema (should use the custom schema)
             try (final PreparedStatement statement = conn.prepareStatement("CREATE TABLE test(ID INT PRIMARY KEY)")) {
                 statement.execute();
             }
+            // Make sure the table was created in the custom schema
             try (final PreparedStatement statement = conn.prepareStatement(format("SELECT * FROM %s.test", SCHEMA_NAME))) {
                 statement.executeQuery().close();
             }
+            // Make sure our custom schema is the default is none is specified
             try (final PreparedStatement statement = conn.prepareStatement("SELECT * FROM test")) {
                 statement.executeQuery().close();
             }
@@ -53,7 +56,7 @@ public class PostgreSQLTests {
         final Properties properties = new Properties();
         properties.setProperty("user", PSQL.getUsername());
         properties.setProperty("password", PSQL.getPassword());
-        properties.setProperty("currentSchema", SCHEMA_NAME);
+        properties.setProperty("currentSchema", SCHEMA_NAME);   // This sets the schema used when none is selected
         try (final Connection conn = DriverManager.getConnection(PSQL.getJdbcUrl(), properties)) {
             consumer.accept(conn);
         }

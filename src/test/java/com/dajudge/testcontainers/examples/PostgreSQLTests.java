@@ -45,7 +45,7 @@ public class PostgreSQLTests {
             try (final PreparedStatement statement = conn.prepareStatement(format("SELECT * FROM %s.test", SCHEMA_NAME))) {
                 statement.executeQuery().close();
             }
-            // Make sure our custom schema is the default is none is specified
+            // Make sure our custom schema is the default if none is specified
             try (final PreparedStatement statement = conn.prepareStatement("SELECT * FROM test")) {
                 statement.executeQuery().close();
             }
